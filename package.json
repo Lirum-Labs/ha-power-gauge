@@ -7,6 +7,8 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",
+    "dev": "concurrently -n build,serve -c blue,green \"rollup -c --watch\" \"serve -l 8000 .\"",
+    "serve": "serve -l 8000 .",
     "lint": "eslint \"src/**/*.ts\"",
     "format": "prettier --write \"src/**/*.ts\""
   },
@@ -29,7 +31,9 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
+    "concurrently": "^8.2.2",
     "rollup": "^4.18.0",
+    "serve": "^14.2.4",
     "tslib": "^2.6.3",
     "typescript": "^5.4.5"
   }

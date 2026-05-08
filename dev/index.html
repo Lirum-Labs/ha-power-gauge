@@ -1,0 +1,340 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Power Gauge Card · Local preview</title>
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+    />
+    <style>
+      :root {
+        --bg-0: #05070d;
+        --bg-1: #0a0f1c;
+        --bg-2: #111b30;
+        --text: #eef3ff;
+        --muted: #6b7894;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        background: radial-gradient(ellipse at 50% 30%, var(--bg-2), var(--bg-0) 70%);
+        color: var(--text);
+        font-family: 'Inter', system-ui, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      body::before {
+        content: '';
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.6), transparent),
+          radial-gradient(1px 1px at 70% 60%, rgba(255, 255, 255, 0.4), transparent),
+          radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.5), transparent),
+          radial-gradient(1px 1px at 85% 20%, rgba(255, 255, 255, 0.3), transparent),
+          radial-gradient(1px 1px at 15% 70%, rgba(255, 255, 255, 0.4), transparent);
+        opacity: 0.35;
+      }
+      .layout {
+        position: relative;
+        z-index: 1;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px 24px 48px;
+        display: grid;
+        gap: 32px;
+        grid-template-columns: 360px 1fr;
+        align-items: start;
+      }
+      h1 {
+        font-size: 18px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+        margin: 0 0 4px;
+      }
+      .sub {
+        font-size: 12px;
+        color: var(--muted);
+        margin-bottom: 20px;
+      }
+      .controls {
+        background: linear-gradient(180deg, #0b1326, #060a14);
+        border: 1px solid rgba(120, 160, 220, 0.12);
+        border-radius: 18px;
+        padding: 22px 22px 18px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+      }
+      label {
+        display: block;
+        margin: 14px 0 6px;
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        color: var(--muted);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      input[type='range'] {
+        flex: 1;
+        accent-color: #1ee0ff;
+      }
+      input[type='number'],
+      input[type='text'] {
+        width: 100%;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        color: var(--text);
+        font-family: inherit;
+        font-variant-numeric: tabular-nums;
+      }
+      input[type='color'] {
+        width: 40px;
+        height: 36px;
+        padding: 0;
+        background: transparent;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 8px;
+        cursor: pointer;
+      }
+      .value-display {
+        font-variant-numeric: tabular-nums;
+        font-size: 14px;
+        color: var(--text);
+        min-width: 70px;
+        text-align: right;
+      }
+      .level-row {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 10px;
+      }
+      button {
+        margin-top: 14px;
+        width: 100%;
+        padding: 10px;
+        background: linear-gradient(180deg, #1ee0ff, #2a7bff);
+        border: 0;
+        border-radius: 8px;
+        color: #001023;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      button:hover {
+        filter: brightness(1.08);
+      }
+      .preview {
+        display: grid;
+        place-items: center;
+        min-height: 600px;
+      }
+      .card-frame {
+        width: 360px;
+      }
+      .footnote {
+        margin-top: 16px;
+        font-size: 11px;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      code {
+        font-family: 'SF Mono', Menlo, monospace;
+        font-size: 11px;
+        background: rgba(255, 255, 255, 0.06);
+        padding: 1px 5px;
+        border-radius: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="controls">
+        <h1>Power Gauge — Preview</h1>
+        <div class="sub">Local sandbox · no Home Assistant required</div>
+
+        <label for="value">Value (live)</label>
+        <div class="row">
+          <input type="range" id="value" min="0" max="5000" value="1240" step="10" />
+          <span class="value-display" id="value-display">1240</span>
+        </div>
+
+        <label>Range</label>
+        <div class="level-row">
+          <input type="number" id="min" value="0" />
+          <input type="number" id="max" value="5000" />
+        </div>
+
+        <label>Normal threshold &amp; color</label>
+        <div class="level-row">
+          <input type="number" id="normal" value="1000" />
+          <input type="color" id="normal_color" value="#1ee0ff" />
+        </div>
+
+        <label>Warning threshold &amp; color</label>
+        <div class="level-row">
+          <input type="number" id="warning" value="3000" />
+          <input type="color" id="warning_color" value="#ff7a2b" />
+        </div>
+
+        <label>Critical threshold &amp; color</label>
+        <div class="level-row">
+          <input type="number" id="critical" value="5000" />
+          <input type="color" id="critical_color" value="#ff1a3c" />
+        </div>
+
+        <label>Display</label>
+        <div class="level-row">
+          <input type="text" id="name" value="Electricity Consumption" placeholder="Name" />
+          <input type="text" id="unit" value="W" placeholder="Unit" style="width: 64px" />
+        </div>
+
+        <button id="auto">▶ Auto drift</button>
+
+        <div class="footnote">
+          Adjust the slider to see the gauge ramp through the configured levels. Run
+          <code>npm run dev</code> to enable live rebuild on source changes.
+        </div>
+      </div>
+
+      <div class="preview">
+        <div class="card-frame" id="card-frame"></div>
+      </div>
+    </div>
+
+    <script type="module">
+      // Stub <ha-card> — the only HA web component the card consumes.
+      class HaCardStub extends HTMLElement {
+        constructor() {
+          super();
+          this.attachShadow({ mode: 'open' });
+          this.shadowRoot.innerHTML = `
+            <style>
+              :host {
+                display: block;
+                background: var(--ha-card-background, transparent);
+                border-radius: var(--ha-card-border-radius, 16px);
+              }
+            </style>
+            <slot></slot>
+          `;
+        }
+      }
+      if (!customElements.get('ha-card')) {
+        customElements.define('ha-card', HaCardStub);
+      }
+
+      await import('../dist/ha-power-gauge.js');
+
+      const card = document.createElement('power-gauge-card');
+      document.getElementById('card-frame').appendChild(card);
+
+      const ids = [
+        'value',
+        'min',
+        'max',
+        'normal',
+        'warning',
+        'critical',
+        'normal_color',
+        'warning_color',
+        'critical_color',
+        'name',
+        'unit',
+      ];
+      const $ = (id) => document.getElementById(id);
+      const num = (id) => Number($(id).value);
+      const str = (id) => $(id).value;
+
+      function rebuild() {
+        const max = num('max');
+        const slider = $('value');
+        slider.max = String(max);
+        slider.min = String(num('min'));
+        $('value-display').textContent = num('value').toLocaleString();
+
+        card.setConfig({
+          type: 'custom:power-gauge-card',
+          entity: 'sensor.demo_power',
+          name: str('name'),
+          unit: str('unit'),
+          min: num('min'),
+          max,
+          normal: num('normal'),
+          warning: num('warning'),
+          critical: num('critical'),
+          normal_color: str('normal_color'),
+          warning_color: str('warning_color'),
+          critical_color: str('critical_color'),
+        });
+        pushHass();
+      }
+
+      function pushHass() {
+        card.hass = {
+          states: {
+            'sensor.demo_power': {
+              entity_id: 'sensor.demo_power',
+              state: String(num('value')),
+              attributes: {
+                friendly_name: str('name') || 'Demo Power',
+                unit_of_measurement: str('unit') || 'W',
+              },
+            },
+          },
+          themes: { darkMode: true },
+          language: 'en',
+          callService: async () => {},
+        };
+      }
+
+      // Wire inputs
+      $('value').addEventListener('input', () => {
+        $('value-display').textContent = num('value').toLocaleString();
+        pushHass();
+      });
+      ids
+        .filter((id) => id !== 'value')
+        .forEach((id) => {
+          $(id).addEventListener('input', rebuild);
+          $(id).addEventListener('change', rebuild);
+        });
+
+      // Auto drift
+      let timer;
+      $('auto').addEventListener('click', (e) => {
+        if (timer) {
+          clearInterval(timer);
+          timer = undefined;
+          e.target.textContent = '▶ Auto drift';
+          return;
+        }
+        e.target.textContent = '⏸ Stop drift';
+        timer = setInterval(() => {
+          const max = num('max');
+          const next = Math.max(
+            0,
+            Math.min(max, num('value') + (Math.random() - 0.5) * (max * 0.12)),
+          );
+          $('value').value = String(Math.round(next));
+          $('value-display').textContent = Math.round(next).toLocaleString();
+          pushHass();
+        }, 800);
+      });
+
+      rebuild();
+    </script>
+  </body>
+</html>
