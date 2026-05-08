@@ -62,6 +62,7 @@ export class PowerGaugeCard extends LitElement {
   @state() private _stops: ColorStop[] = [];
 
   private _target = 0;
+  private _initialized = false;
   private _animFrom = 0;
   private _animTo = 0;
   private _animStart = 0;
@@ -99,7 +100,14 @@ export class PowerGaugeCard extends LitElement {
   protected willUpdate(changed: PropertyValues): void {
     if ((changed.has('hass') || changed.has('_config')) && this.hass && this._config) {
       const next = this._readEntityValue();
-      if (next !== this._target) {
+      if (!this._initialized) {
+        // First successful read — snap to the entity value to avoid a misleading
+        // animation from 0 on cold start. Subsequent updates still animate.
+        this._initialized = true;
+        this._target = next;
+        this._animated = next;
+        this._live = next;
+      } else if (next !== this._target) {
         this._target = next;
         this._startAnim(next);
       }
