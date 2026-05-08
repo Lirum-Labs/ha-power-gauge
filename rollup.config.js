@@ -18,7 +18,7 @@ export default {
     resolve({ browser: true }),
     commonjs(),
     json(),
-    typescript({ tsconfig: './tsconfig.json' }),
+    typescript({ tsconfig: './tsconfig.json', sourceMap: dev, inlineSources: dev }),
     !dev && terser({ format: { comments: false } }),
   ],
 };
