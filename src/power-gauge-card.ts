@@ -97,29 +97,37 @@ export class PowerGaugeCard extends LitElement {
     if (this._ambientRaf) cancelAnimationFrame(this._ambientRaf);
   }
 
-  protected willUpdate(changed: PropertyValues): void {
-    if ((changed.has('hass') || changed.has('_config')) && this.hass && this._config) {
-      const next = this._readEntityValue();
-      if (!this._initialized) {
-        // First successful read — snap to the entity value to avoid a misleading
-        // animation from 0 on cold start. Subsequent updates still animate.
-        this._initialized = true;
-        this._target = next;
-        this._animated = next;
-        this._live = next;
-      } else if (next !== this._target) {
-        this._target = next;
-        this._startAnim(next);
-      }
+  protected willUpdate(_changed: PropertyValues): void {
+    if (!this.hass || !this._config) return;
+    const next = this._readEntityValue();
+    if (next === null) return; // entity not loaded / unavailable — wait
+    if (!this._initialized) {
+      // First successful read — snap to the entity value so the gauge
+      // appears at the correct number instead of animating from 0.
+      this._initialized = true;
+      this._target = next;
+      this._animated = next;
+      this._live = next;
+      return;
+    }
+    if (next !== this._target) {
+      this._target = next;
+      this._startAnim(next);
     }
   }
 
-  private _readEntityValue(): number {
-    if (!this.hass || !this._config) return 0;
+  /**
+   * Read the entity's numeric value, returning `null` if the entity hasn't
+   * loaded yet, is unavailable/unknown, or doesn't parse as a number. This
+   * lets the rest of the card distinguish "no data yet" from "actually 0".
+   */
+  private _readEntityValue(): number | null {
+    if (!this.hass || !this._config) return null;
     const state = this.hass.states[this._config.entity];
-    if (!state) return 0;
+    if (!state) return null;
+    if (state.state === 'unavailable' || state.state === 'unknown') return null;
     const n = Number(state.state);
-    return Number.isFinite(n) ? n : 0;
+    return Number.isFinite(n) ? n : null;
   }
 
   private _startAnim(to: number): void {
@@ -171,6 +179,9 @@ export class PowerGaugeCard extends LitElement {
     const friendly =
       this._config.name ?? state.attributes.friendly_name ?? this._config.entity;
     const precision = this._config.precision ?? 0;
+    const ready = this._initialized;
+    const liveLabel = ready ? this._format(live, precision) : '—';
+    const secondary = ready ? this._secondaryLine(live, unit, palette) : 'WAITING FOR DATA';
 
     const cssVars = {
       '--c1': palette.c1,
@@ -199,9 +210,9 @@ export class PowerGaugeCard extends LitElement {
                   <div class="reading">
                     <div class="label-now">Live draw</div>
                     <div class="value">
-                      ${this._format(live, precision)}<span class="unit-inline">${unit}</span>
+                      ${liveLabel}<span class="unit-inline">${unit}</span>
                     </div>
-                    <div class="unit">${this._secondaryLine(live, unit, palette)}</div>
+                    <div class="unit">${secondary}</div>
                   </div>
                 </div>
               </div>
@@ -216,8 +227,8 @@ export class PowerGaugeCard extends LitElement {
           </div>
 
           <div class="status">
-            <span><span class="pulse-dot"></span>Streaming</span>
-            <span>Now <b>${this._format(live, precision)} ${unit}</b></span>
+            <span><span class="pulse-dot"></span>${ready ? 'Streaming' : 'Connecting'}</span>
+            <span>Now <b>${liveLabel} ${unit}</b></span>
             <span>Limit <b>${this._formatLimit(max, unit)}</b></span>
           </div>
         </div>
@@ -560,6 +571,8 @@ export class PowerGaugeCard extends LitElement {
     .status b {
       color: var(--text);
       font-weight: 600;
+      font-family: 'SF Mono', 'JetBrains Mono', 'Menlo', 'Consolas', ui-monospace, monospace;
+      letter-spacing: 0;
     }
 
     .pulse-dot {
