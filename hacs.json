@@ -1,0 +1,6 @@
+{
+  "name": "Power Gauge Card",
+  "render_readme": true,
+  "filename": "ha-power-gauge.js",
+  "content_in_root": false
+}
