@@ -1,5 +1,8 @@
 import type { LovelaceCardConfig } from 'custom-card-helpers';
 
+/** A single level can be a bare threshold (number) or {value, color}. */
+export type LevelInput = number | { value?: number; color?: string };
+
 export interface PowerGaugeCardConfig extends LovelaceCardConfig {
   type: string;
   entity: string;
@@ -8,6 +11,17 @@ export interface PowerGaugeCardConfig extends LovelaceCardConfig {
   min?: number;
   max?: number;
   precision?: number;
+
+  /** Threshold at which the gauge fully expresses the "normal" colour. */
+  normal?: LevelInput;
+  /** Threshold at which the gauge fully expresses the "warning" colour. */
+  warning?: LevelInput;
+  /** Threshold at which the gauge fully expresses the "critical" colour. */
+  critical?: LevelInput;
+
+  normal_color?: string;
+  warning_color?: string;
+  critical_color?: string;
 }
 
 export interface HassEntity {

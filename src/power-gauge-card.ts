@@ -3,7 +3,17 @@ import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { CARD_VERSION, CARD_TAG, EDITOR_TAG, CARD_NAME, CARD_DESCRIPTION } from './const';
-import { arcPath, clamp, easeOutCubic, lerp, polar, rampColor, type Palette } from './utils';
+import {
+  arcPath,
+  clamp,
+  easeOutCubic,
+  lerp,
+  polar,
+  rampColor,
+  type ColorStop,
+  type Palette,
+} from './utils';
+import { buildStops } from './levels';
 import type { HomeAssistant, PowerGaugeCardConfig } from './types';
 
 /* eslint-disable no-console */
@@ -49,6 +59,7 @@ export class PowerGaugeCard extends LitElement {
   @state() private _config?: PowerGaugeCardConfig;
   @state() private _animated = 0;
   @state() private _live = 0;
+  @state() private _stops: ColorStop[] = [];
 
   private _target = 0;
   private _animFrom = 0;
@@ -66,6 +77,7 @@ export class PowerGaugeCard extends LitElement {
       throw new Error('You need to define an entity');
     }
     this._config = { min: 0, max: 5000, precision: 0, ...config };
+    this._stops = buildStops(this._config);
   }
 
   public getCardSize(): number {
@@ -146,7 +158,7 @@ export class PowerGaugeCard extends LitElement {
     const range = Math.max(1, max - min);
     const live = this._live;
     const pct = clamp((live - min) / range, 0, 1);
-    const palette = rampColor(pct);
+    const palette = rampColor(pct, this._stops);
     const unit = this._config.unit ?? state.attributes.unit_of_measurement ?? 'W';
     const friendly =
       this._config.name ?? state.attributes.friendly_name ?? this._config.entity;

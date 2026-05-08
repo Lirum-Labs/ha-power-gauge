@@ -10,28 +10,28 @@ export interface Palette {
   mood: string;
 }
 
-interface ColorStop extends Palette {
+export interface ColorStop extends Palette {
+  /** Position along the 0..1 normalised gauge axis where this stop is fully expressed. */
   t: number;
 }
 
-const STOPS: ColorStop[] = [
-  { t: 0.0, c1: '#1ee0ff', c2: '#2a7bff', c3: '#0a3aa0', mood: 'IDLE' },
-  { t: 0.35, c1: '#2bd9ff', c2: '#2864ff', c3: '#0a2a90', mood: 'NORMAL' },
-  { t: 0.65, c1: '#7eb8ff', c2: '#5a78ff', c3: '#3a2090', mood: 'ACTIVE' },
-  { t: 0.8, c1: '#ffc24a', c2: '#ff7a2b', c3: '#a02a00', mood: 'HIGH' },
-  { t: 1.0, c1: '#ff4d6d', c2: '#ff1a3c', c3: '#700010', mood: 'PEAK' },
-];
-
 function hex(h: string): [number, number, number] {
-  const s = h.replace('#', '');
+  const s = h.replace('#', '').trim();
+  const v =
+    s.length === 3
+      ? s
+          .split('')
+          .map((c) => c + c)
+          .join('')
+      : s;
   return [
-    parseInt(s.slice(0, 2), 16),
-    parseInt(s.slice(2, 4), 16),
-    parseInt(s.slice(4, 6), 16),
+    parseInt(v.slice(0, 2), 16),
+    parseInt(v.slice(2, 4), 16),
+    parseInt(v.slice(4, 6), 16),
   ];
 }
 
-function mix(h1: string, h2: string, t: number): string {
+export function mix(h1: string, h2: string, t: number): string {
   const a = hex(h1);
   const b = hex(h2);
   const r = Math.round(lerp(a[0], b[0], t));
@@ -40,22 +40,47 @@ function mix(h1: string, h2: string, t: number): string {
   return `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${bl.toString(16).padStart(2, '0')}`;
 }
 
-export function rampColor(pct: number): Palette {
+/** Derive companion shades (mid + deep) from a single seed colour for the arc gradient. */
+export function deriveShades(c1: string): { c1: string; c2: string; c3: string } {
+  return {
+    c1,
+    c2: mix(c1, '#000000', 0.35),
+    c3: mix(c1, '#000000', 0.7),
+  };
+}
+
+/**
+ * Linearly interpolate the palette across an ordered list of stops.
+ *
+ * Below the first stop or above the last stop, the colour clamps to the
+ * boundary stop. Between two stops, c1/c2/c3 are mixed channel-wise so the
+ * colour shifts smoothly rather than snapping at level boundaries.
+ */
+export function rampColor(pct: number, stops: ColorStop[]): Palette {
+  if (stops.length === 0) {
+    return { c1: '#1ee0ff', c2: '#2a7bff', c3: '#0a3aa0', mood: 'NORMAL' };
+  }
+  const sorted = [...stops].sort((a, b) => a.t - b.t);
   const p = clamp(pct, 0, 1);
-  for (let i = 0; i < STOPS.length - 1; i++) {
-    const a = STOPS[i];
-    const b = STOPS[i + 1];
+  if (p <= sorted[0].t) {
+    const s = sorted[0];
+    return { c1: s.c1, c2: s.c2, c3: s.c3, mood: s.mood };
+  }
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const a = sorted[i];
+    const b = sorted[i + 1];
     if (p <= b.t) {
-      const t = (p - a.t) / (b.t - a.t);
+      const span = b.t - a.t;
+      const t = span > 0 ? (p - a.t) / span : 0;
       return {
         c1: mix(a.c1, b.c1, t),
         c2: mix(a.c2, b.c2, t),
         c3: mix(a.c3, b.c3, t),
-        mood: p >= (a.t + b.t) / 2 ? b.mood : a.mood,
+        mood: t < 0.5 ? a.mood : b.mood,
       };
     }
   }
-  const last = STOPS[STOPS.length - 1];
+  const last = sorted[sorted.length - 1];
   return { c1: last.c1, c2: last.c2, c3: last.c3, mood: last.mood };
 }
 
