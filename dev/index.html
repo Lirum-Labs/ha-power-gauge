@@ -47,11 +47,30 @@
         z-index: 1;
         max-width: 1100px;
         margin: 0 auto;
-        padding: 32px 24px 48px;
+        padding: 24px 16px 48px;
         display: grid;
-        gap: 32px;
-        grid-template-columns: 360px 1fr;
+        gap: 24px;
+        grid-template-columns: 1fr;
         align-items: start;
+      }
+      @media (min-width: 880px) {
+        .layout {
+          grid-template-columns: 360px 1fr;
+          padding: 32px 24px 48px;
+          gap: 32px;
+        }
+        .preview {
+          order: 2;
+        }
+        .controls {
+          order: 1;
+        }
+      }
+      .preview {
+        order: 1;
+      }
+      .controls {
+        order: 2;
       }
       h1 {
         font-size: 18px;
@@ -139,10 +158,11 @@
       .preview {
         display: grid;
         place-items: center;
-        min-height: 600px;
+        min-height: 480px;
       }
       .card-frame {
-        width: 360px;
+        width: 100%;
+        max-width: 360px;
       }
       .footnote {
         margin-top: 16px;
