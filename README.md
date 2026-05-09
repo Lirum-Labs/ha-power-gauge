@@ -61,6 +61,8 @@ Hard-refresh your browser. That's it — JSDelivr serves the bundle straight fro
 
 ## Usage — radial gauge (`power-gauge-card`)
 
+<p align="center"><img src="docs/radial-gauge.png" alt="Power Gauge Card showing 6,340 W in WARNING state" width="380"></p>
+
 Open a dashboard in edit mode, click **Add Card**, search for **Power Gauge Card**, and pick your sensor — or paste this into your YAML:
 
 ```yaml
@@ -77,6 +79,8 @@ rolling_numbers: false                 # see "Behaviour" below
 ```
 
 ## Usage — linear bar card (`power-gauge-bar-card`)
+
+<p align="center"><img src="docs/bar-cards.png" alt="Two stacked Power Gauge Bar Cards: a single-row 'EcoFlow Delta' showing an in-warning fill, and an 'Office' card with five rows in cool cyan" width="500"></p>
 
 The bar card stacks one thin glowing row per entity, with a JetBrains Mono number on the right and a colour-ramping fill bar below. Same threshold logic as the radial card, but the card-level options become defaults that every row inherits — and any individual row can override them.
 
