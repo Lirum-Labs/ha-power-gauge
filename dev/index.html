@@ -241,30 +241,32 @@
       </div>
     </div>
 
-    <script type="module">
-      // Stub <ha-card> — the only HA web component the card consumes.
+    <!--
+      Stub <ha-card> BEFORE loading the gauge bundle so the gauge's first
+      render finds it already defined. Plain script tags work over file://.
+    -->
+    <script>
       class HaCardStub extends HTMLElement {
         constructor() {
           super();
           this.attachShadow({ mode: 'open' });
-          this.shadowRoot.innerHTML = `
-            <style>
-              :host {
-                display: block;
-                background: var(--ha-card-background, transparent);
-                border-radius: var(--ha-card-border-radius, 16px);
-              }
-            </style>
-            <slot></slot>
-          `;
+          this.shadowRoot.innerHTML =
+            '<style>:host{display:block;background:var(--ha-card-background,transparent);border-radius:var(--ha-card-border-radius,16px)}</style><slot></slot>';
         }
       }
       if (!customElements.get('ha-card')) {
         customElements.define('ha-card', HaCardStub);
       }
+    </script>
 
-      await import('../dist/ha-power-gauge.js');
+    <!--
+      IIFE build of the gauge — loaded as a classic script so this page
+      works whether opened via http(s):// (npm run dev/serve) or directly
+      off disk via file://. Browsers refuse ES module imports over file://.
+    -->
+    <script src="../dist/ha-power-gauge.iife.js"></script>
 
+    <script>
       const card = document.createElement('power-gauge-card');
       document.getElementById('card-frame').appendChild(card);
 
