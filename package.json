@@ -20,7 +20,16 @@
     "power",
     "energy"
   ],
-  "license": "MIT",
+  "license": "Apache-2.0",
+  "author": "Lirum Labs (https://github.com/Lirum-Labs)",
+  "homepage": "https://github.com/Lirum-Labs/ha-power-gauge",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lirum-Labs/ha-power-gauge.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Lirum-Labs/ha-power-gauge/issues"
+  },
   "dependencies": {
     "custom-card-helpers": "^1.9.0",
     "lit": "^3.1.4"

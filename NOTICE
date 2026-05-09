@@ -1,0 +1,21 @@
+Power Gauge Card
+Copyright 2026 Lirum Labs (https://github.com/Lirum-Labs)
+
+This product includes software developed by Lirum Labs.
+
+Licensed under the Apache License, Version 2.0. See LICENSE.
+
+If you redistribute, fork, or build a derivative work that includes this
+card (in source or compiled form), Section 4(d) of the Apache License
+requires you to keep this NOTICE intact and reproduce its attribution in
+at least one of:
+
+  - a NOTICE file distributed with your derivative,
+  - your derivative's documentation, or
+  - a credits screen / "About" panel surfaced by the derivative.
+
+A simple line such as
+
+  "Includes Power Gauge Card by Lirum Labs (https://github.com/Lirum-Labs/ha-power-gauge)"
+
+satisfies this requirement.
