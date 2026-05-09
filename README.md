@@ -64,6 +64,7 @@ critical: 5000    # at/above this, gauge is fully red
 | `normal_color`    | string   | `#1ee0ff` (cyan/blue)                  | Hex color for the normal level                                       |
 | `warning_color`   | string   | `#ff7a2b` (orange)                     | Hex color for the warning level                                      |
 | `critical_color`  | string   | `#ff1a3c` (red)                        | Hex color for the critical level                                     |
+| `rolling_numbers` | boolean  | `true`                                 | When `true`, the displayed value continuously fluctuates ±1.2% around the live value to give the gauge an "alive" feel. When `false`, it only updates when the entity changes, smoothly ramping from old → new on each update. |
 
 Between any two levels, the colour interpolates smoothly channel-by-channel — the arc, ticks, halo and central glow all shift together as the value changes.
 

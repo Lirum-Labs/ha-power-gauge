@@ -77,7 +77,13 @@ export class PowerGaugeCard extends LitElement {
     if (!config.entity) {
       throw new Error('You need to define an entity');
     }
-    this._config = { min: 0, max: 5000, precision: 0, ...config };
+    this._config = {
+      min: 0,
+      max: 5000,
+      precision: 0,
+      rolling_numbers: true,
+      ...config,
+    };
     this._stops = buildStops(this._config);
   }
 
@@ -149,9 +155,15 @@ export class PowerGaugeCard extends LitElement {
 
   private _startAmbient(): void {
     const loop = (now: number): void => {
-      const t = (now - this._ambientStart) / 1000;
-      const drift = Math.sin((t * Math.PI * 2) / AMBIENT_PERIOD) * AMBIENT_AMP;
-      this._live = this._animated + drift * this._animated;
+      // Re-read on every frame so toggling `rolling_numbers` from the
+      // editor is picked up without remounting the card.
+      if (this._config?.rolling_numbers ?? true) {
+        const t = (now - this._ambientStart) / 1000;
+        const drift = Math.sin((t * Math.PI * 2) / AMBIENT_PERIOD) * AMBIENT_AMP;
+        this._live = this._animated + drift * this._animated;
+      } else {
+        this._live = this._animated;
+      }
       this._ambientRaf = requestAnimationFrame(loop);
     };
     this._ambientRaf = requestAnimationFrame(loop);

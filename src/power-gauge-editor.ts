@@ -46,6 +46,7 @@ const SCHEMA: SchemaItem[] = [
       },
     ],
   },
+  { name: 'rolling_numbers', selector: { boolean: {} } },
   {
     name: '',
     type: 'expandable',
@@ -86,6 +87,7 @@ const LABELS: Record<string, string> = {
   min: 'Minimum value',
   max: 'Maximum value',
   precision: 'Decimal places',
+  rolling_numbers: 'Rolling numbers (rapid fluctuation around the live value)',
   normal: 'Normal threshold',
   normal_color: `Normal color (default ${DEFAULT_NORMAL_COLOR})`,
   warning: 'Warning threshold',

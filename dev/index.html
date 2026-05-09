@@ -221,6 +221,13 @@
           <input type="text" id="unit" value="W" placeholder="Unit" style="width: 64px" />
         </div>
 
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+          <input type="checkbox" id="rolling_numbers" checked style="margin: 0" />
+          <span style="font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase">
+            Rolling numbers
+          </span>
+        </label>
+
         <button id="auto">▶ Auto drift</button>
 
         <div class="footnote">
@@ -273,10 +280,12 @@
         'critical_color',
         'name',
         'unit',
+        'rolling_numbers',
       ];
       const $ = (id) => document.getElementById(id);
       const num = (id) => Number($(id).value);
       const str = (id) => $(id).value;
+      const bool = (id) => $(id).checked;
 
       function rebuild() {
         const max = num('max');
@@ -298,6 +307,7 @@
           normal_color: str('normal_color'),
           warning_color: str('warning_color'),
           critical_color: str('critical_color'),
+          rolling_numbers: bool('rolling_numbers'),
         });
         pushHass();
       }

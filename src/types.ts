@@ -22,6 +22,14 @@ export interface PowerGaugeCardConfig extends LovelaceCardConfig {
   normal_color?: string;
   warning_color?: string;
   critical_color?: string;
+
+  /**
+   * When true (default), the displayed value continuously fluctuates
+   * around the real entity value to give the gauge a "live" feel. When
+   * false, the value only changes when the entity actually changes,
+   * smoothly ramping from old → new on each update.
+   */
+  rolling_numbers?: boolean;
 }
 
 export interface HassEntity {
