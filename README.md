@@ -10,7 +10,7 @@ climbs from cool blue, through orange, into deep red — exactly the way an elec
 One opinionated component. No theme to install, no helpers to plumb.
 Drop it on any sensor that reports a number, give it three thresholds, and watch it breathe.
 
-[![Release](https://img.shields.io/github/v/release/Lirum-Labs/ha-power-gauge?display_name=tag&sort=semver)](https://github.com/Lirum-Labs/ha-power-gauge/releases)
+[![Release](https://img.shields.io/github/v/release/Lirum-Labs/ha-power-gauge?display_name=tag&sort=semver&logo=github&color=4A90D9)](https://github.com/Lirum-Labs/ha-power-gauge/releases)
 [![License](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 [![Home Assistant](https://img.shields.io/badge/home%20assistant-custom%20card-41BDF5?logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
 [![JSDelivr hits](https://img.shields.io/jsdelivr/gh/hm/Lirum-Labs/ha-power-gauge)](https://www.jsdelivr.com/package/gh/Lirum-Labs/ha-power-gauge)
