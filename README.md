@@ -15,6 +15,8 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 [![Home Assistant](https://img.shields.io/badge/home%20assistant-custom%20card-41BDF5?logo=home-assistant&logoColor=white)](https://www.home-assistant.io/)
 [![JSDelivr hits](https://img.shields.io/jsdelivr/gh/hm/Lirum-Labs/ha-power-gauge)](https://www.jsdelivr.com/package/gh/Lirum-Labs/ha-power-gauge)
 
+> **Two cards in one bundle.** A single resource registers both **Power Gauge Card** (the radial gauge above) and **Power Gauge Bar Card** — a compact linear variant that stacks one row per device, sharing the same colour ramp and threshold logic. Pick whichever fits the panel.
+
 ---
 
 ## What it does
@@ -40,7 +42,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 Skip HACS entirely. *Settings → Dashboards → Resources → Add Resource*:
 
 ```
-URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.1.3/dist/ha-power-gauge.js
+URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.0/dist/ha-power-gauge.js
 Type: JavaScript Module
 ```
 
@@ -57,7 +59,7 @@ Hard-refresh your browser. That's it — JSDelivr serves the bundle straight fro
    ```
 4. Hard-refresh.
 
-## Usage
+## Usage — radial gauge (`power-gauge-card`)
 
 Open a dashboard in edit mode, click **Add Card**, search for **Power Gauge Card**, and pick your sensor — or paste this into your YAML:
 
@@ -74,6 +76,43 @@ critical: 8000                         # red at/above this draw
 rolling_numbers: false                 # see "Behaviour" below
 ```
 
+## Usage — linear bar card (`power-gauge-bar-card`)
+
+The bar card stacks one thin glowing row per entity, with a JetBrains Mono number on the right and a colour-ramping fill bar below. Same threshold logic as the radial card, but the card-level options become defaults that every row inherits — and any individual row can override them.
+
+```yaml
+type: custom:power-gauge-bar-card
+title: Per-room consumption
+# Card-level defaults — each row inherits these unless overridden.
+unit: W
+min: 0
+max: 5000
+normal: 1000
+warning: 3000
+critical: 5000
+rolling_numbers: false
+
+entities:
+  # Bare entity_id: uses every default above and the entity's friendly_name.
+  - sensor.living_room_power
+  - sensor.kitchen_power
+  - sensor.office_power
+
+  # Object form: override anything per row.
+  - entity: sensor.ev_charger_power
+    name: EV charger
+    max: 7400        # this circuit can pull a lot more than the rest
+    critical: 7000
+  - entity: sensor.hvac_power
+    name: HVAC
+    warning: 2500
+```
+
+**When to use which?**
+
+- **Radial gauge** — when one device matters and you want the dashboard *moment* to scream when it goes red.
+- **Bar card** — when you want a glanceable per-circuit summary and need to fit several meters in the same vertical space.
+
 ### Tuning the thresholds for your panel
 
 - **`max`** is what the gauge axis represents — set it to a value your panel will rarely exceed (e.g. 10 kW for a typical residential 200 A panel rarely peaking past that).
@@ -84,6 +123,8 @@ rolling_numbers: false                 # see "Behaviour" below
 Between any two thresholds the colour interpolates linearly across both the foreground arc and its derived shades, so the visual response feels smooth rather than stepped.
 
 ## Options
+
+### `power-gauge-card` (radial)
 
 | Option            | Type    | Default                               | Description                                                                                                                                                                  |
 | ----------------- | ------- | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -100,6 +141,40 @@ Between any two thresholds the colour interpolates linearly across both the fore
 | `warning_color`   | string  | `#ff7a2b` (orange)                    | Hex colour for the warning level.                                                                                                                                            |
 | `critical_color`  | string  | `#ff1a3c` (red)                       | Hex colour for the critical level.                                                                                                                                           |
 | `rolling_numbers` | boolean | `true`                                | When `true`, the displayed value continuously fluctuates ±1.2 % around the live value. When `false`, the value only changes on actual entity updates and ramps old → new.    |
+
+### `power-gauge-bar-card` (linear, multi-entity)
+
+| Option            | Type      | Default                              | Description                                                                                                                  |
+| ----------------- | --------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `title`           | string    | _(none)_                             | Optional uppercase title shown above the stack.                                                                              |
+| `entities`        | list      | _(required)_                         | One row per entry. Each is either an entity_id string or an object `{ entity, name?, … }` — see "Per-row overrides" below.   |
+| `min`             | number    | `0`                                  | Default lower bound for every row.                                                                                           |
+| `max`             | number    | `5000`                               | Default upper bound for every row.                                                                                           |
+| `unit`            | string    | entity's `unit_of_measurement` or `W`| Default unit shown next to each value.                                                                                       |
+| `precision`       | number    | `0`                                  | Default decimal places.                                                                                                      |
+| `normal`          | number    | `min + 20% × (max − min)`            | Default normal threshold.                                                                                                    |
+| `warning`         | number    | `min + 60% × (max − min)`            | Default warning threshold.                                                                                                   |
+| `critical`        | number    | `max`                                | Default critical threshold.                                                                                                  |
+| `normal_color`    | string    | `#1ee0ff`                            | Default normal colour (hex).                                                                                                 |
+| `warning_color`   | string    | `#ff7a2b`                            | Default warning colour (hex).                                                                                                |
+| `critical_color`  | string    | `#ff1a3c`                            | Default critical colour (hex).                                                                                               |
+| `rolling_numbers` | boolean   | `true`                               | Same semantics as the radial card; applies to every row.                                                                     |
+
+#### Per-row overrides
+
+Any entry in `entities` can be an object that overrides the card-level defaults for that single bar:
+
+```yaml
+entities:
+  - sensor.living_room_power            # row 1: uses every default
+  - entity: sensor.ev_charger_power     # row 2: customised
+    name: EV charger
+    max: 7400
+    critical: 7000
+    critical_color: '#ff8800'           # softer "critical" for this row only
+```
+
+The visual editor lists entities (multi-select) and the shared defaults. For per-row overrides, edit the YAML directly — every option from the table above is available inside an entry.
 
 ## Behaviour
 

@@ -156,13 +156,23 @@
         filter: brightness(1.08);
       }
       .preview {
-        display: grid;
-        place-items: center;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        align-items: center;
         min-height: 480px;
       }
       .card-frame {
         width: 100%;
         max-width: 360px;
+      }
+      .preview-label {
+        font-size: 10px;
+        letter-spacing: 1.6px;
+        text-transform: uppercase;
+        color: var(--muted);
+        font-weight: 600;
+        align-self: flex-start;
       }
       .footnote {
         margin-top: 16px;
@@ -237,7 +247,10 @@
       </div>
 
       <div class="preview">
+        <div class="preview-label">Radial gauge</div>
         <div class="card-frame" id="card-frame"></div>
+        <div class="preview-label" style="margin-top: 12px">Bar gauge (multi-entity)</div>
+        <div class="card-frame" id="bar-frame"></div>
       </div>
     </div>
 
@@ -270,6 +283,17 @@
       const card = document.createElement('power-gauge-card');
       document.getElementById('card-frame').appendChild(card);
 
+      const barCard = document.createElement('power-gauge-bar-card');
+      document.getElementById('bar-frame').appendChild(barCard);
+
+      const BAR_DEMO_ENTITIES = [
+        { id: 'sensor.demo_living_room', name: 'Living room', base: 1240 },
+        { id: 'sensor.demo_kitchen', name: 'Kitchen', base: 2900 },
+        { id: 'sensor.demo_hvac', name: 'HVAC', base: 3850 },
+        { id: 'sensor.demo_ev', name: 'EV charger', base: 4600 },
+        { id: 'sensor.demo_office', name: 'Office', base: 420 },
+      ];
+
       const ids = [
         'value',
         'min',
@@ -296,10 +320,7 @@
         slider.min = String(num('min'));
         $('value-display').textContent = num('value').toLocaleString();
 
-        card.setConfig({
-          type: 'custom:power-gauge-card',
-          entity: 'sensor.demo_power',
-          name: str('name'),
+        const sharedConfig = {
           unit: str('unit'),
           min: num('min'),
           max,
@@ -310,26 +331,55 @@
           warning_color: str('warning_color'),
           critical_color: str('critical_color'),
           rolling_numbers: bool('rolling_numbers'),
+        };
+        card.setConfig({
+          type: 'custom:power-gauge-card',
+          entity: 'sensor.demo_power',
+          name: str('name'),
+          ...sharedConfig,
+        });
+        barCard.setConfig({
+          type: 'custom:power-gauge-bar-card',
+          title: 'Per-room consumption',
+          entities: BAR_DEMO_ENTITIES.map((e) => ({ entity: e.id, name: e.name })),
+          ...sharedConfig,
         });
         pushHass();
       }
 
       function pushHass() {
-        card.hass = {
-          states: {
-            'sensor.demo_power': {
-              entity_id: 'sensor.demo_power',
-              state: String(num('value')),
-              attributes: {
-                friendly_name: str('name') || 'Demo Power',
-                unit_of_measurement: str('unit') || 'W',
-              },
+        const sliderValue = num('value');
+        const states = {
+          'sensor.demo_power': {
+            entity_id: 'sensor.demo_power',
+            state: String(sliderValue),
+            attributes: {
+              friendly_name: str('name') || 'Demo Power',
+              unit_of_measurement: str('unit') || 'W',
             },
           },
+        };
+        // Spread the slider value across the per-room rows so they shift
+        // through their colour bands together as the slider moves.
+        const totalBase = BAR_DEMO_ENTITIES.reduce((s, e) => s + e.base, 0);
+        for (const e of BAR_DEMO_ENTITIES) {
+          states[e.id] = {
+            entity_id: e.id,
+            state: String(Math.round((sliderValue * e.base) / Math.max(1, totalBase / 5))),
+            attributes: {
+              friendly_name: e.name,
+              unit_of_measurement: str('unit') || 'W',
+            },
+          };
+        }
+        const hass = {
+          states,
           themes: { darkMode: true },
           language: 'en',
           callService: async () => {},
         };
+        card.hass = hass;
+        barCard.hass = hass;
       }
 
       // Wire inputs

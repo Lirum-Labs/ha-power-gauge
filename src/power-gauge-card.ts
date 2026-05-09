@@ -2,7 +2,7 @@ import { LitElement, html, css, svg, nothing, type PropertyValues, type Template
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
-import { CARD_VERSION, CARD_TAG, EDITOR_TAG, CARD_NAME, CARD_DESCRIPTION } from './const';
+import { CARD_TAG, EDITOR_TAG, CARD_NAME, CARD_DESCRIPTION } from './const';
 import {
   arcPath,
   clamp,
@@ -15,14 +15,6 @@ import {
 } from './utils';
 import { buildStops } from './levels';
 import type { HomeAssistant, PowerGaugeCardConfig } from './types';
-
-/* eslint-disable no-console */
-console.info(
-  `%c POWER-GAUGE-CARD %c v${CARD_VERSION} `,
-  'color:#fff; background:#1ee0ff; font-weight:600; padding:2px 6px; border-radius:3px 0 0 3px;',
-  'color:#1ee0ff; background:#0a0f1c; font-weight:600; padding:2px 6px; border-radius:0 3px 3px 0;',
-);
-/* eslint-enable no-console */
 
 (window.customCards = window.customCards || []).push({
   type: CARD_TAG,
