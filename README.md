@@ -25,6 +25,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 - **Smooth channel-wise colour blending.** Between any two thresholds the palette is interpolated continuously, so the gauge *transitions*, never *jumps*, as the load moves through the band.
 - **Live-feel motion.** Animated tick ring (80 ticks light up sequentially), rotating outer aura, counter-rotating dashed inner ring, shimmering halo, pulsing "streaming" indicator.
 - **Optional rolling-numbers flicker.** A subtle ±1.2 % drift on the displayed value. Toggle off (`rolling_numbers: false`) if you'd rather see exactly what the entity reports.
+- **Theme-friendly background.** Ships with the signature dark gradient by default, but `background: transparent` lets HA's surface bleed through and the text colours auto-swap to HA's `--primary-text-color` / `--secondary-text-color` so it stays readable in both dark and light HA themes. Or hand it any CSS — `background: '#1a1a2e'`, `background: 'linear-gradient(...)'`, `background: 'var(--my-token)'`.
 - **Visual editor.** Configure entity, range, thresholds, colours, precision and rolling-numbers behaviour from the dashboard's *Add Card → Edit* UI — no YAML required.
 - **Robust to slow data.** Renders `—` with `WAITING FOR DATA` while the entity is missing / unavailable / unknown, then snaps to the real value the moment it arrives. No more "stuck at 0" while HA is still warming up.
 - **Accessible.** Honours `prefers-reduced-motion`. All numbers in the lower readout are tabular-monospace so digit churn doesn't shove labels around.
@@ -42,7 +43,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 Skip HACS entirely. *Settings → Dashboards → Resources → Add Resource*:
 
 ```
-URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.0/dist/ha-power-gauge.js
+URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.2/dist/ha-power-gauge.js
 Type: JavaScript Module
 ```
 
@@ -116,6 +117,14 @@ entities:
 
 - **Radial gauge** — when one device matters and you want the dashboard *moment* to scream when it goes red.
 - **Bar card** — when you want a glanceable per-circuit summary and need to fit several meters in the same vertical space.
+
+**Want the cards to blend into your HA theme?** Add `background: transparent` to either card and HA's surface colour shows through. Title / labels / status text automatically switch to HA's primary / secondary text colours so the cards stay readable on both dark and light themes:
+
+```yaml
+type: custom:power-gauge-card
+entity: sensor.grid_power_watts
+background: transparent
+```
 
 ### Tuning the thresholds for your panel
 

@@ -1,4 +1,4 @@
-export const CARD_VERSION = '0.2.1';
+export const CARD_VERSION = '0.2.2';
 
 // Radial (existing) card.
 export const CARD_TAG = 'power-gauge-card';
