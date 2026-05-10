@@ -1,6 +1,6 @@
 {
   "name": "ha-power-gauge",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "A glowing, animated power consumption gauge card for Home Assistant.",
   "main": "dist/ha-power-gauge.js",
   "type": "module",

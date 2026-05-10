@@ -45,7 +45,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 Skip HACS entirely. *Settings → Dashboards → Resources → Add Resource*:
 
 ```
-URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.2/dist/ha-power-gauge.js
+URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.3/dist/ha-power-gauge.js
 Type: JavaScript Module
 ```
 
