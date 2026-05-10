@@ -34,6 +34,8 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 
 ### Option 1 — HACS (recommended)
 
+> Once the card is accepted into the HACS default index, it'll appear in *HACS → Frontend* without the custom-repository step. Until then, add it as a custom repository:
+
 1. **HACS → Frontend** → ⋮ menu → *Custom repositories*.
 2. Add `https://github.com/Lirum-Labs/ha-power-gauge` with category **Lovelace**.
 3. Install **Power Gauge Card**, then hard-refresh your browser (Cmd/Ctrl + Shift + R).
@@ -221,6 +223,14 @@ Or just open `dev/index.html` straight off disk in a browser — no server neede
 ## Contributing
 
 Issues and pull requests welcome at <https://github.com/Lirum-Labs/ha-power-gauge>. Conventional Commits is used for messages. Run `npm run build` before opening a PR — the committed `dist/` is what JSDelivr serves and what HA loads.
+
+### HACS submission
+
+Anyone can already install this via HACS as a custom repository (see *Install — Option 1* above). To get it into the **default HACS index** so it shows up in the picker without the custom-repo step, the standard process is:
+
+1. The repo passes the [`hacs/action`](https://github.com/hacs/action) checks — automated in `.github/workflows/hacs.yml` and run on every push to `main`.
+2. Open a PR against [`hacs/default`](https://github.com/hacs/default) adding `Lirum-Labs/ha-power-gauge` to the `plugin` file (alphabetically).
+3. HACS maintainers review and merge. After merge, all HACS users see the card in their *Frontend* tab without configuring anything.
 
 ## License
 
