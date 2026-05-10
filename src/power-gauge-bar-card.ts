@@ -1,4 +1,4 @@
-import { LitElement, html, css, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { LitElement, html, css, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
@@ -8,7 +8,15 @@ import {
   BAR_CARD_DESCRIPTION,
   BAR_EDITOR_TAG,
 } from './const';
-import { clamp, easeOutCubic, lerp, rampColor, type ColorStop } from './utils';
+import {
+  DEFAULT_BAR_BG,
+  backgroundVars,
+  clamp,
+  easeOutCubic,
+  lerp,
+  rampColor,
+  type ColorStop,
+} from './utils';
 import { buildStops } from './levels';
 import type {
   BarEntityInput,
@@ -193,8 +201,10 @@ export class PowerGaugeBarCard extends LitElement {
       .map((e) => this._resolveRow(e))
       .filter((r): r is ResolvedRow => r !== null);
 
+    const cssVars = backgroundVars(this._config.background, DEFAULT_BAR_BG);
+
     return html`
-      <ha-card>
+      <ha-card style=${styleMap(cssVars)}>
         <div class="wrap">
           ${this._config.title
             ? html`<div class="card-title">${this._config.title}</div>`
@@ -244,17 +254,20 @@ export class PowerGaugeBarCard extends LitElement {
 
   static styles = css`
     :host {
+      --pg-bg: ${unsafeCSS(DEFAULT_BAR_BG)};
+      --pg-text: #eef3ff;
+      --pg-muted: #6b7894;
       display: block;
     }
 
     ha-card {
-      background: linear-gradient(180deg, #0b1326, #060a14);
-      color: #eef3ff;
-      border: 1px solid rgba(120, 160, 220, 0.12);
+      background: var(--pg-bg);
+      color: var(--pg-text);
+      border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
       border-radius: var(--ha-card-border-radius, 14px);
       box-shadow:
         0 12px 28px rgba(0, 0, 0, 0.35),
-        0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        0 0 0 1px color-mix(in oklab, currentColor 2%, transparent) inset;
       overflow: hidden;
       font-family: 'Inter', var(--primary-font-family, system-ui, sans-serif);
     }
@@ -271,7 +284,7 @@ export class PowerGaugeBarCard extends LitElement {
       font-weight: 600;
       letter-spacing: 0.4px;
       text-transform: uppercase;
-      color: rgba(255, 255, 255, 0.7);
+      color: color-mix(in oklab, currentColor 70%, transparent);
       padding: 2px 2px 0;
     }
 
@@ -289,11 +302,11 @@ export class PowerGaugeBarCard extends LitElement {
       border-radius: 12px;
       background: linear-gradient(
         180deg,
-        rgba(255, 255, 255, 0.03),
-        rgba(255, 255, 255, 0.005)
+        color-mix(in oklab, currentColor 3%, transparent),
+        color-mix(in oklab, currentColor 0.5%, transparent)
       );
-      border: 1px solid rgba(120, 160, 220, 0.1);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+      border: 1px solid color-mix(in oklab, currentColor 10%, transparent);
+      box-shadow: inset 0 1px 0 color-mix(in oklab, currentColor 3%, transparent);
       display: grid;
       grid-template-columns: 1fr auto;
       grid-template-rows: auto auto;
@@ -306,7 +319,7 @@ export class PowerGaugeBarCard extends LitElement {
       grid-column: 1;
       grid-row: 1;
       font-size: 12px;
-      color: rgba(255, 255, 255, 0.78);
+      color: color-mix(in oklab, currentColor 78%, transparent);
       letter-spacing: 0.2px;
       font-weight: 500;
       overflow: hidden;
@@ -320,14 +333,14 @@ export class PowerGaugeBarCard extends LitElement {
       font-family: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
       font-size: 14px;
       font-weight: 500;
-      color: #fff;
+      color: var(--pg-text);
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.2px;
     }
 
     .value .unit {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.55);
+      color: color-mix(in oklab, currentColor 55%, transparent);
       margin-left: 4px;
       font-weight: 400;
     }
@@ -338,7 +351,7 @@ export class PowerGaugeBarCard extends LitElement {
       position: relative;
       height: 6px;
       border-radius: 999px;
-      background: rgba(255, 255, 255, 0.06);
+      background: color-mix(in oklab, currentColor 8%, transparent);
       overflow: hidden;
     }
 

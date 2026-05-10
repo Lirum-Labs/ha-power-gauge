@@ -103,3 +103,36 @@ export function arcPath(
 }
 
 export const easeOutCubic = (t: number): number => 1 - Math.pow(1 - t, 3);
+
+/**
+ * Default radial-card background — the rich blue gradient with the top
+ * highlight that the original design ships with.
+ */
+export const DEFAULT_RADIAL_BG =
+  'radial-gradient(120% 80% at 50% 0%, rgba(40, 90, 200, 0.25), transparent 60%), linear-gradient(180deg, #0b1326, #060a14)';
+
+/** Default bar-card background — flat dark blue gradient. */
+export const DEFAULT_BAR_BG = 'linear-gradient(180deg, #0b1326, #060a14)';
+
+/**
+ * Resolve user-provided background into the CSS custom properties the cards
+ * read from. When the user picks `transparent` we let HA's theme show
+ * through and switch the foreground / muted text colors to HA's theme
+ * variables so the card stays readable in both dark and light HA themes.
+ * Any other value (default included) keeps the card's own dark aesthetic
+ * with white-ish text — picking a light custom colour is at the user's
+ * discretion.
+ */
+export function backgroundVars(
+  input: string | undefined,
+  defaultBg: string,
+): Record<string, string> {
+  const raw = (input ?? '').trim();
+  const bg = raw.length === 0 ? defaultBg : raw;
+  const isTransparent = bg.toLowerCase() === 'transparent';
+  return {
+    '--pg-bg': bg,
+    '--pg-text': isTransparent ? 'var(--primary-text-color, #eef3ff)' : '#eef3ff',
+    '--pg-muted': isTransparent ? 'var(--secondary-text-color, #6b7894)' : '#6b7894',
+  };
+}

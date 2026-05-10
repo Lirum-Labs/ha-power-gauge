@@ -145,6 +145,7 @@ Between any two thresholds the colour interpolates linearly across both the fore
 | `warning_color`   | string  | `#ff7a2b` (orange)                    | Hex colour for the warning level.                                                                                                                                            |
 | `critical_color`  | string  | `#ff1a3c` (red)                       | Hex colour for the critical level.                                                                                                                                           |
 | `rolling_numbers` | boolean | `true`                                | When `true`, the displayed value continuously fluctuates ±1.2 % around the live value. When `false`, the value only changes on actual entity updates and ramps old → new.    |
+| `background`      | string  | _(signature dark gradient)_           | Any CSS background — color, gradient, or `transparent`. When `transparent`, HA's theme background shows through and text colours adapt to the active dark/light theme.       |
 
 ### `power-gauge-bar-card` (linear, multi-entity)
 
@@ -163,6 +164,7 @@ Between any two thresholds the colour interpolates linearly across both the fore
 | `warning_color`   | string    | `#ff7a2b`                            | Default warning colour (hex).                                                                                                |
 | `critical_color`  | string    | `#ff1a3c`                            | Default critical colour (hex).                                                                                               |
 | `rolling_numbers` | boolean   | `true`                               | Same semantics as the radial card; applies to every row.                                                                     |
+| `background`      | string    | _(signature dark gradient)_          | Any CSS background — color, gradient, or `transparent`. Same dark/light theme adaptation as the radial card.                |
 
 #### Per-row overrides
 
@@ -184,6 +186,7 @@ The visual editor lists entities (multi-select) and the shared defaults. For per
 
 - **`rolling_numbers: true` (default)** — the gauge feels *alive*. A 2.6 s sine drift gently varies the displayed number ±1.2 % around the real value. Use this when you want the dashboard to look animated even when the underlying sensor only updates every few seconds.
 - **`rolling_numbers: false`** — strictly truthful. The value sits exactly on what the entity reports, and when the entity changes, the number rolls smoothly from old to new over 700 ms (`easeOutCubic`) before settling. Best when accuracy matters more than ambience.
+- **`background`** — defaults to the card's signature dark gradient and works on any HA theme. Set it to `transparent` if you want HA's surface colour to bleed through (the title, label and status text automatically switch to HA's `--primary-text-color` / `--secondary-text-color` so they stay readable on either dark or light themes). Any other CSS value (`#1a1a2e`, `linear-gradient(...)`, `var(--my-token)`) is used verbatim — pick a dark colour or the white-on-X text inside the card may lose contrast.
 - **Loading / unavailable** — while `hass.states[entity]` is missing, `unavailable`, `unknown`, or non-numeric, the centre reads `—` with mood `WAITING FOR DATA` and the bottom pill says `Connecting`. The gauge snaps straight to the real value the instant it arrives — no animating up from `0`.
 - **Reduced motion** — if the OS reports `prefers-reduced-motion: reduce`, the rotating aura, dashed ring, halo shimmer and pulse-dot animations are disabled. Colour-ramp animations for actual value changes are kept (they're informational, not decorative).
 

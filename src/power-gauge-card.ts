@@ -1,10 +1,12 @@
-import { LitElement, html, css, svg, nothing, type PropertyValues, type TemplateResult } from 'lit';
+import { LitElement, html, css, svg, nothing, unsafeCSS, type PropertyValues, type TemplateResult } from 'lit';
 import { customElement, property, state } from 'lit/decorators.js';
 import { styleMap } from 'lit/directives/style-map.js';
 
 import { CARD_TAG, EDITOR_TAG, CARD_NAME, CARD_DESCRIPTION } from './const';
 import {
+  DEFAULT_RADIAL_BG,
   arcPath,
+  backgroundVars,
   clamp,
   easeOutCubic,
   lerp,
@@ -191,6 +193,7 @@ export class PowerGaugeCard extends LitElement {
       '--c1': palette.c1,
       '--c2': palette.c2,
       '--c3': palette.c3,
+      ...backgroundVars(this._config.background, DEFAULT_RADIAL_BG),
     };
 
     const currentEnd = START_A + SWEEP * pct;
@@ -372,11 +375,9 @@ export class PowerGaugeCard extends LitElement {
 
   static styles = css`
     :host {
-      --bg-0: #05070d;
-      --bg-1: #0a0f1c;
-      --bg-2: #111b30;
-      --text: #eef3ff;
-      --muted: #6b7894;
+      --pg-bg: ${unsafeCSS(DEFAULT_RADIAL_BG)};
+      --pg-text: #eef3ff;
+      --pg-muted: #6b7894;
       --c1: #1ee0ff;
       --c2: #2a7bff;
       --c3: #0a3aa0;
@@ -385,18 +386,13 @@ export class PowerGaugeCard extends LitElement {
     }
 
     ha-card {
-      background: radial-gradient(
-          120% 80% at 50% 0%,
-          rgba(40, 90, 200, 0.25),
-          transparent 60%
-        ),
-        linear-gradient(180deg, #0b1326, #060a14);
-      color: var(--text);
-      border: 1px solid rgba(120, 160, 220, 0.12);
+      background: var(--pg-bg);
+      color: var(--pg-text);
+      border: 1px solid color-mix(in oklab, currentColor 12%, transparent);
       border-radius: var(--ha-card-border-radius, 16px);
       box-shadow:
         0 20px 40px rgba(0, 0, 0, 0.45),
-        0 0 0 1px rgba(255, 255, 255, 0.02) inset;
+        0 0 0 1px color-mix(in oklab, currentColor 2%, transparent) inset;
       overflow: hidden;
       font-family: 'Inter', var(--primary-font-family, system-ui, sans-serif);
     }
@@ -414,11 +410,11 @@ export class PowerGaugeCard extends LitElement {
       inset: 0;
       pointer-events: none;
       background:
-        radial-gradient(1px 1px at 20% 30%, rgba(255, 255, 255, 0.6), transparent),
-        radial-gradient(1px 1px at 70% 60%, rgba(255, 255, 255, 0.4), transparent),
-        radial-gradient(1px 1px at 40% 80%, rgba(255, 255, 255, 0.5), transparent),
-        radial-gradient(1px 1px at 85% 20%, rgba(255, 255, 255, 0.3), transparent),
-        radial-gradient(1px 1px at 15% 70%, rgba(255, 255, 255, 0.4), transparent);
+        radial-gradient(1px 1px at 20% 30%, color-mix(in oklab, currentColor 60%, transparent), transparent),
+        radial-gradient(1px 1px at 70% 60%, color-mix(in oklab, currentColor 40%, transparent), transparent),
+        radial-gradient(1px 1px at 40% 80%, color-mix(in oklab, currentColor 50%, transparent), transparent),
+        radial-gradient(1px 1px at 85% 20%, color-mix(in oklab, currentColor 30%, transparent), transparent),
+        radial-gradient(1px 1px at 15% 70%, color-mix(in oklab, currentColor 40%, transparent), transparent);
       opacity: 0.3;
     }
 
@@ -439,7 +435,7 @@ export class PowerGaugeCard extends LitElement {
 
     .subtitle {
       font-size: 11px;
-      color: var(--muted);
+      color: var(--pg-muted);
       margin-top: 4px;
       letter-spacing: 0.4px;
     }
@@ -505,7 +501,7 @@ export class PowerGaugeCard extends LitElement {
     .label-now {
       font-size: 9px;
       letter-spacing: 2.5px;
-      color: var(--muted);
+      color: var(--pg-muted);
       text-transform: uppercase;
       font-weight: 600;
       margin-bottom: 6px;
@@ -516,6 +512,7 @@ export class PowerGaugeCard extends LitElement {
       font-weight: 300;
       letter-spacing: -1.2px;
       font-variant-numeric: tabular-nums;
+      /* Always white inside the dark gauge core regardless of card theme. */
       color: #fff;
       text-shadow: 0 0 20px color-mix(in oklab, var(--c1) 60%, transparent);
       line-height: 1;
@@ -523,13 +520,13 @@ export class PowerGaugeCard extends LitElement {
 
     .unit-inline {
       font-size: 16px;
-      color: rgba(255, 255, 255, 0.55);
+      color: color-mix(in oklab, #fff 55%, transparent);
       margin-left: 4px;
     }
 
     .unit {
       font-size: 11px;
-      color: rgba(255, 255, 255, 0.55);
+      color: color-mix(in oklab, #fff 55%, transparent);
       margin-top: 6px;
       letter-spacing: 1.5px;
       font-weight: 500;
@@ -566,14 +563,14 @@ export class PowerGaugeCard extends LitElement {
       gap: 8px;
       padding: 6px 4px 0;
       font-size: 11px;
-      color: var(--muted);
+      color: var(--pg-muted);
       font-variant-numeric: tabular-nums;
       position: relative;
       z-index: 1;
     }
 
     .status b {
-      color: var(--text);
+      color: var(--pg-text);
       font-weight: 600;
       font-family: 'SF Mono', 'JetBrains Mono', 'Menlo', 'Consolas', ui-monospace, monospace;
       letter-spacing: 0;

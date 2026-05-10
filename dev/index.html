@@ -238,6 +238,17 @@
           </span>
         </label>
 
+        <label>Background</label>
+        <select id="background_preset" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--text); font-family: inherit;">
+          <option value="">Default (signature gradient)</option>
+          <option value="transparent">Transparent (HA theme adopts)</option>
+          <option value="#1a1a2e">Solid #1a1a2e (deep indigo)</option>
+          <option value="linear-gradient(180deg, #2d0050, #0a0014)">Magenta gradient</option>
+          <option value="#f5f5f7">Light grey #f5f5f7 (test light bg)</option>
+          <option value="custom">Custom (type below)…</option>
+        </select>
+        <input type="text" id="background" placeholder="Custom CSS color or gradient" style="margin-top: 6px; display: none" />
+
         <button id="auto">▶ Auto drift</button>
 
         <div class="footnote">
@@ -307,11 +318,20 @@
         'name',
         'unit',
         'rolling_numbers',
+        'background_preset',
+        'background',
       ];
       const $ = (id) => document.getElementById(id);
       const num = (id) => Number($(id).value);
       const str = (id) => $(id).value;
       const bool = (id) => $(id).checked;
+      const resolveBackground = () => {
+        const preset = str('background_preset');
+        const customField = $('background');
+        customField.style.display = preset === 'custom' ? '' : 'none';
+        if (preset === 'custom') return str('background').trim() || undefined;
+        return preset || undefined; // empty preset = default (no override)
+      };
 
       function rebuild() {
         const max = num('max');
@@ -331,6 +351,7 @@
           warning_color: str('warning_color'),
           critical_color: str('critical_color'),
           rolling_numbers: bool('rolling_numbers'),
+          background: resolveBackground(),
         };
         card.setConfig({
           type: 'custom:power-gauge-card',

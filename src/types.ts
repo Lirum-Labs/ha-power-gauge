@@ -30,6 +30,14 @@ export interface PowerGaugeCardConfig extends LovelaceCardConfig {
    * smoothly ramping from old → new on each update.
    */
   rolling_numbers?: boolean;
+
+  /**
+   * Card background. Any CSS color, gradient, or `transparent`. When
+   * unset, the card's signature blue gradient is used. When set to
+   * `transparent`, HA's theme background shows through and the text
+   * colours adapt to HA's dark / light theme automatically.
+   */
+  background?: string;
 }
 
 /**
@@ -72,6 +80,8 @@ export interface PowerGaugeBarCardConfig extends LovelaceCardConfig {
   warning_color?: string;
   critical_color?: string;
   rolling_numbers?: boolean;
+  /** See `PowerGaugeCardConfig.background` — same semantics. */
+  background?: string;
 }
 
 export interface HassEntity {
