@@ -238,6 +238,13 @@
           </span>
         </label>
 
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
+          <input type="checkbox" id="source_unavailable" style="margin: 0" />
+          <span style="font-size: 11px; letter-spacing: 0.4px; text-transform: uppercase">
+            Source unavailable
+          </span>
+        </label>
+
         <label>Background</label>
         <select id="background_preset" style="width: 100%; padding: 8px 10px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; color: var(--text); font-family: inherit;">
           <option value="">Default (signature gradient)</option>
@@ -318,6 +325,7 @@
         'name',
         'unit',
         'rolling_numbers',
+        'source_unavailable',
         'background_preset',
         'background',
       ];
@@ -370,10 +378,11 @@
 
       function pushHass() {
         const sliderValue = num('value');
+        const sourceState = bool('source_unavailable') ? 'unavailable' : String(sliderValue);
         const states = {
           'sensor.demo_power': {
             entity_id: 'sensor.demo_power',
-            state: String(sliderValue),
+            state: sourceState,
             attributes: {
               friendly_name: str('name') || 'Demo Power',
               unit_of_measurement: str('unit') || 'W',
@@ -386,7 +395,9 @@
         for (const e of BAR_DEMO_ENTITIES) {
           states[e.id] = {
             entity_id: e.id,
-            state: String(Math.round((sliderValue * e.base) / Math.max(1, totalBase / 5))),
+            state: bool('source_unavailable')
+              ? 'unavailable'
+              : String(Math.round((sliderValue * e.base) / Math.max(1, totalBase / 5))),
             attributes: {
               friendly_name: e.name,
               unit_of_measurement: str('unit') || 'W',

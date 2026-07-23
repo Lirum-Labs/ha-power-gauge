@@ -115,12 +115,21 @@ export class PowerGaugeBarCard extends LitElement {
       const entityId = typeof input === 'string' ? input : input.entity;
       if (!entityId) continue;
       const next = this._readValue(entityId);
-      if (next === null) continue;
+      if (next === null) {
+        // An invalid source must not leave a stale sample visible as though
+        // it were current. A recovered source is treated as a fresh reading.
+        this._initialized.delete(entityId);
+        delete this._targets[entityId];
+        delete this._animated[entityId];
+        delete this._live[entityId];
+        delete this._ramps[entityId];
+        continue;
+      }
       if (!this._initialized.has(entityId)) {
         this._initialized.add(entityId);
         this._targets[entityId] = next;
         this._animated[entityId] = next;
-        // _live for this row gets seeded by the next loop tick.
+        this._live[entityId] = next;
         continue;
       }
       if (this._targets[entityId] !== next) {
@@ -138,8 +147,9 @@ export class PowerGaugeBarCard extends LitElement {
     if (!this.hass) return null;
     const s = this.hass.states[entityId];
     if (!s) return null;
-    if (s.state === 'unavailable' || s.state === 'unknown') return null;
-    const n = Number(s.state);
+    const raw = s.state.trim();
+    if (raw === '' || raw === 'unavailable' || raw === 'unknown') return null;
+    const n = Number(raw);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -216,18 +226,17 @@ export class PowerGaugeBarCard extends LitElement {
   }
 
   private _renderRow(row: ResolvedRow): TemplateResult {
-    const ready = this._initialized.has(row.entity);
+    const ready =
+      this._initialized.has(row.entity) && this._readValue(row.entity) !== null;
     const live = this._live[row.entity] ?? this._animated[row.entity] ?? 0;
     const range = Math.max(1, row.max - row.min);
-    const pct = clamp((live - row.min) / range, 0, 1);
+    const pct = ready ? clamp((live - row.min) / range, 0, 1) : 0;
     const palette = rampColor(pct, row.stops);
-    const valueLabel = ready
-      ? this._format(live, row.precision)
-      : '—';
+    const valueLabel = ready ? this._format(live, row.precision) : '—';
 
     return html`
       <div
-        class="row"
+        class="row ${ready ? '' : 'no-data'}"
         style=${styleMap({
           '--c1': palette.c1,
           '--c2': palette.c2,
@@ -235,7 +244,9 @@ export class PowerGaugeBarCard extends LitElement {
         })}
       >
         <div class="label">${row.name}</div>
-        <div class="value">${valueLabel}<span class="unit">${row.unit}</span></div>
+        <div class="value">
+          ${valueLabel}${ready ? html`<span class="unit">${row.unit}</span>` : nothing}
+        </div>
         <div class="track" aria-hidden="true">
           <div class="fill"></div>
           <div class="cap"></div>
@@ -377,6 +388,11 @@ export class PowerGaugeBarCard extends LitElement {
       background: var(--c1);
       transform: translate(-50%, -50%);
       box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.5), 0 0 8px var(--c1);
+    }
+
+    .row.no-data .fill,
+    .row.no-data .cap {
+      opacity: 0;
     }
 
     @media (prefers-reduced-motion: reduce) {

@@ -100,7 +100,16 @@ export class PowerGaugeCard extends LitElement {
   protected willUpdate(_changed: PropertyValues): void {
     if (!this.hass || !this._config) return;
     const next = this._readEntityValue();
-    if (next === null) return; // entity not loaded / unavailable — wait
+    if (next === null) {
+      // Do not keep presenting the last sample as live data while the source
+      // is unavailable, unknown, or otherwise invalid. Resetting also makes
+      // the next valid sample snap into place instead of rolling from stale
+      // data that may be arbitrarily old.
+      this._initialized = false;
+      if (this._animRaf) cancelAnimationFrame(this._animRaf);
+      this._animRaf = undefined;
+      return;
+    }
     if (!this._initialized) {
       // First successful read — snap to the entity value so the gauge
       // appears at the correct number instead of animating from 0.
@@ -125,8 +134,9 @@ export class PowerGaugeCard extends LitElement {
     if (!this.hass || !this._config) return null;
     const state = this.hass.states[this._config.entity];
     if (!state) return null;
-    if (state.state === 'unavailable' || state.state === 'unknown') return null;
-    const n = Number(state.state);
+    const raw = state.state.trim();
+    if (raw === '' || raw === 'unavailable' || raw === 'unknown') return null;
+    const n = Number(raw);
     return Number.isFinite(n) ? n : null;
   }
 
@@ -151,11 +161,11 @@ export class PowerGaugeCard extends LitElement {
     const loop = (now: number): void => {
       // Re-read on every frame so toggling `rolling_numbers` from the
       // editor is picked up without remounting the card.
-      if (this._config?.rolling_numbers ?? true) {
+      if (this._initialized && (this._config?.rolling_numbers ?? true)) {
         const t = (now - this._ambientStart) / 1000;
         const drift = Math.sin((t * Math.PI * 2) / AMBIENT_PERIOD) * AMBIENT_AMP;
         this._live = this._animated + drift * this._animated;
-      } else {
+      } else if (this._initialized) {
         this._live = this._animated;
       }
       this._ambientRaf = requestAnimationFrame(loop);
@@ -178,16 +188,16 @@ export class PowerGaugeCard extends LitElement {
     const min = this._config.min ?? 0;
     const max = this._config.max ?? 5000;
     const range = Math.max(1, max - min);
-    const live = this._live;
-    const pct = clamp((live - min) / range, 0, 1);
+    const ready = this._initialized && this._readEntityValue() !== null;
+    const live = ready ? this._live : min;
+    const pct = ready ? clamp((live - min) / range, 0, 1) : 0;
     const palette = rampColor(pct, this._stops);
     const unit = this._config.unit ?? state.attributes.unit_of_measurement ?? 'W';
     const friendly =
       this._config.name ?? state.attributes.friendly_name ?? this._config.entity;
     const precision = this._config.precision ?? 0;
-    const ready = this._initialized;
     const liveLabel = ready ? this._format(live, precision) : '—';
-    const secondary = ready ? this._secondaryLine(live, unit, palette) : 'WAITING FOR DATA';
+    const secondary = ready ? this._secondaryLine(live, unit, palette) : 'NO DATA';
 
     const cssVars = {
       '--c1': palette.c1,
@@ -205,19 +215,23 @@ export class PowerGaugeCard extends LitElement {
           <div class="header">
             <div>
               <div class="title">${friendly}</div>
-              <div class="subtitle">Live · ${(max / 1000).toFixed(1)} ${unit === 'W' ? 'kW' : unit} max</div>
+              <div class="subtitle">
+                ${ready
+                  ? html`Live · ${(max / 1000).toFixed(1)} ${unit === 'W' ? 'kW' : unit} max`
+                  : 'Awaiting a valid source value'}
+              </div>
             </div>
           </div>
 
           <div class="stage">
-            <div class="gauge">
+            <div class="gauge ${ready ? '' : 'no-data'}">
               ${this._renderSvg(palette, currentEnd)}
               <div class="center">
                 <div class="core">
                   <div class="reading">
-                    <div class="label-now">Live draw</div>
+                    <div class="label-now">${ready ? 'Live draw' : 'Source unavailable'}</div>
                     <div class="value">
-                      ${liveLabel}<span class="unit-inline">${unit}</span>
+                      ${liveLabel}${ready ? html`<span class="unit-inline">${unit}</span>` : nothing}
                     </div>
                     <div class="unit">${secondary}</div>
                   </div>
@@ -234,9 +248,12 @@ export class PowerGaugeCard extends LitElement {
           </div>
 
           <div class="status">
-            <span><span class="pulse-dot"></span>${ready ? 'Streaming' : 'Connecting'}</span>
-            <span>Now <b>${liveLabel} ${unit}</b></span>
-            <span>Limit <b>${this._formatLimit(max, unit)}</b></span>
+            <span
+              ><span class="pulse-dot ${ready ? '' : 'inactive'}"></span
+              >${ready ? 'Streaming' : 'No data'}</span
+            >
+            <span>Now <b>${ready ? `${liveLabel} ${unit}` : '—'}</b></span>
+            <span>Limit <b>${ready ? this._formatLimit(max, unit) : '—'}</b></span>
           </div>
         </div>
       </ha-card>
@@ -585,6 +602,18 @@ export class PowerGaugeCard extends LitElement {
       margin-right: 6px;
       animation: pg-pulse 1.4s ease-in-out infinite;
       box-shadow: 0 0 8px var(--c1);
+    }
+
+    .pulse-dot.inactive {
+      background: var(--pg-muted);
+      animation: none;
+      box-shadow: none;
+    }
+
+    .gauge.no-data .spin-slow,
+    .gauge.no-data .spin-fast,
+    .gauge.no-data .shimmer {
+      animation: none;
     }
 
     @keyframes pg-pulse {

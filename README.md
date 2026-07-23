@@ -27,7 +27,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 - **Optional rolling-numbers flicker.** A subtle ±1.2 % drift on the displayed value. Toggle off (`rolling_numbers: false`) if you'd rather see exactly what the entity reports.
 - **Theme-friendly background.** Ships with the signature dark gradient by default, but `background: transparent` lets HA's surface bleed through and the text colours auto-swap to HA's `--primary-text-color` / `--secondary-text-color` so it stays readable in both dark and light HA themes. Or hand it any CSS — `background: '#1a1a2e'`, `background: 'linear-gradient(...)'`, `background: 'var(--my-token)'`.
 - **Visual editor.** Configure entity, range, thresholds, colours, precision and rolling-numbers behaviour from the dashboard's *Add Card → Edit* UI — no YAML required.
-- **Robust to slow data.** Renders `—` with `WAITING FOR DATA` while the entity is missing / unavailable / unknown, then snaps to the real value the moment it arrives. No more "stuck at 0" while HA is still warming up.
+- **Robust to missing data.** Renders `—` with `NO DATA` while the entity is unavailable, unknown, or non-numeric, suppresses live animations and stale values, then snaps to the real value when it returns.
 - **Accessible.** Honours `prefers-reduced-motion`. All numbers in the lower readout are tabular-monospace so digit churn doesn't shove labels around.
 
 ## Install
@@ -45,7 +45,7 @@ Drop it on any sensor that reports a number, give it three thresholds, and watch
 Skip HACS entirely. *Settings → Dashboards → Resources → Add Resource*:
 
 ```
-URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.3/dist/ha-power-gauge.js
+URL:  https://cdn.jsdelivr.net/gh/Lirum-Labs/ha-power-gauge@v0.2.4/dist/ha-power-gauge.js
 Type: JavaScript Module
 ```
 
@@ -198,7 +198,7 @@ The visual editor lists entities (multi-select) and the shared defaults. For per
 - **`rolling_numbers: true` (default)** — the gauge feels *alive*. A 2.6 s sine drift gently varies the displayed number ±1.2 % around the real value. Use this when you want the dashboard to look animated even when the underlying sensor only updates every few seconds.
 - **`rolling_numbers: false`** — strictly truthful. The value sits exactly on what the entity reports, and when the entity changes, the number rolls smoothly from old to new over 700 ms (`easeOutCubic`) before settling. Best when accuracy matters more than ambience.
 - **`background`** — defaults to the card's signature dark gradient and works on any HA theme. Set it to `transparent` if you want HA's surface colour to bleed through (the title, label and status text automatically switch to HA's `--primary-text-color` / `--secondary-text-color` so they stay readable on either dark or light themes). Any other CSS value (`#1a1a2e`, `linear-gradient(...)`, `var(--my-token)`) is used verbatim — pick a dark colour or the white-on-X text inside the card may lose contrast.
-- **Loading / unavailable** — while `hass.states[entity]` is missing, `unavailable`, `unknown`, or non-numeric, the centre reads `—` with mood `WAITING FOR DATA` and the bottom pill says `Connecting`. The gauge snaps straight to the real value the instant it arrives — no animating up from `0`.
+- **Loading / unavailable** — while `hass.states[entity]` is `unavailable`, `unknown`, or non-numeric, the centre reads `—` with mood `NO DATA`, live indicators and animations stop, and stale readings and limits are hidden. The gauge snaps straight to the real value when it returns — no animating from old data.
 - **Reduced motion** — if the OS reports `prefers-reduced-motion: reduce`, the rotating aura, dashed ring, halo shimmer and pulse-dot animations are disabled. Colour-ramp animations for actual value changes are kept (they're informational, not decorative).
 
 ## Local development & preview
@@ -211,7 +211,7 @@ npm run build      # → dist/ha-power-gauge.js (ES module, for HA)
 
 ### Try it without Home Assistant
 
-The repo ships a self-contained sandbox at [`dev/index.html`](dev/index.html) with sliders for value, thresholds, colours and the `rolling_numbers` toggle, plus an *Auto drift* button that simulates a fluctuating sensor.
+The repo ships a self-contained sandbox at [`dev/index.html`](dev/index.html) with sliders for value, thresholds, colours, `rolling_numbers`, and source availability, plus an *Auto drift* button that simulates a fluctuating sensor.
 
 ```bash
 npm run dev        # rollup --watch + static server on http://localhost:8000
